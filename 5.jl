@@ -28,7 +28,7 @@ function overlaps(lines, m_size, with_diag = false)
     line_diag = filter(x -> abs((x[1][2] - x[2][2]) / (x[1][1] - x[2][1])) == 1 , lines) # shit
     for line = 1:length(line_diag)
       l = line_diag[line] # current line [ [x1,y1], [x2,y2] ]
-      # if we up to down or right to left, change the iteration direction in line 43
+      # if we up to down or right to left, change the iteration direction in the for loop below
       x_dir = l[1][1] < l[2][1] ? 1 : -1
       y_dir  = l[1][2] < l[2][2] ? 1 : -1
       # for every (x,y) diagonal pair, add +1 
