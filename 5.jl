@@ -1,67 +1,49 @@
-raw_input = readlines("5.txt")
 
-lines = []
 
-maxval = 0
-for line in raw_input
-  p = split(line, " -> ")
-  if length(p) < 2
-    continue
+function parseinput(raw_input)
+  maxval = 0
+  lines = []
+  for line in raw_input
+    p = map(x -> x .+ 1 , [parse.(Int, split(x, ",")) for x in [ y for y in split(line, " -> ")]])
+    push!(lines, p)
+    maxval = max(maxval, reduce(max,(reduce(max,p))))
   end
-
-  p1 = parse.(Int, split(p[1], ","))
-  p2 = parse.(Int, split(p[2], ","))
-  p1[1] += 1
-  p1[2] += 1
-  p2[1] += 1
-  p2[2] += 1
-  _m1 = max(p1[1], p1[2])  # shit 
-  _m2 = max(p2[1], p2[2]) 
-  global maxval = max(maxval, _m1, _m2)
-  push!(lines, [p1, p2])
+  return lines, maxval
 end
-  
-lines = reshape(lines, (:,2))
 
 function overlaps(lines, m_size, with_diag = false)
-  answer = 0
-  field = zeros(Int, (m_size,m_size))
-  hor_or_diag = filter(x -> x[1][1] == x[2][1] || x[1][2] == x[2][2], lines) # shit
-  if with_diag
-    onlydiag = filter(x -> abs((x[1][2] - x[2][2]) / (x[1][1] - x[2][1])) == 1 , lines) # shit
-  end
+  field = zeros(Int, (m_size,m_size)) #m_size is the maximum value : a lot of memory for big numbers !!!
+
+  line_straight = filter(x -> x[1][1] == x[2][1] || x[1][2] == x[2][2], lines) # shit
   
-  for linenum in 1:length(hor_or_diag)
-    ranges = copy(hor_or_diag[linenum])
+  for linenum in 1:length(line_straight)
+    ranges = line_straight[linenum]
     ranges = sort(ranges, by= x -> x[1])
     ranges = sort(ranges, by= x -> x[2])
 
     field[ranges[1][2]:ranges[2][2], ranges[1][1]:ranges[2][1]] .+= 1
   end
 
-  if with_diag
-  for line = 1:length(onlydiag)
-    range = onlydiag[line]
-    r1 = 1
-    r2 = 1
-    if(range[1][1] > range[2][1])
-      r1 = -1
+  if(with_diag)
+    line_diag = filter(x -> abs((x[1][2] - x[2][2]) / (x[1][1] - x[2][1])) == 1 , lines) # shit
+    for line = 1:length(line_diag)
+      l = line_diag[line] # current line [ [x1,y1], [x2,y2] ]
+      # if we up to down or right to left, change the iteration direction in line 43
+      x_dir = l[1][1] < l[2][1] ? 1 : -1
+      y_dir  = l[1][2] < l[2][2] ? 1 : -1
+      # for every (x,y) diagonal pair, add +1 
+      for (rx, ry) in zip(l[1][1]:x_dir:l[2][1], l[1][2]:y_dir:l[2][2])
+        field[ry, rx] += 1
+      end
     end
-    if(range[1][2] > range[2][2])
-      r2 = -1
-    end
-    for (rx, ry) in zip(range[1][1]:r1:range[2][1], range[1][2]:r2:range[2][2])
-      field[ry, rx] += 1
-    end
-  
-  
   end
-end
-  answer = sum(count.(x -> x > 1, field))
-  return answer
+  return count(x -> x .> 1, field)
 end
 
-  
-println(overlaps(lines, maxval))
-println(overlaps(lines, maxval,true)) # with diag
-println(maxval)
+#i/o
+raw_input = readlines("5.txt")
+lines, maxval = parseinput(raw_input)
+# first part  
+@time println(overlaps(lines, maxval))
+# second part with diag option 
+@time println(overlaps(lines, maxval,true))
