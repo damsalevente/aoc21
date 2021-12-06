@@ -11,31 +11,27 @@ function solve(original_in,num )
 end
 
 
-#=
-# 1
-# 0
-# 6 7
-#
-=#
 function part2(line_in, num)
-  # init -> 0 -> grow
-  # 0 -> 6 downto 0 to grow
-  # 8 -> 0 -> 6 
-  x_80 = 0
-  idx = 1
-  for element in line_in
-    to = num - element
-    spawn_times = idx + 8:6:to 
-    while(idx != to)
-      x_80 += length(spawn_times)
-      spawn_times = idx + 8:6:to
-    end
+  fishes = zeros(Int, 9)
+
+  for x in line_in
+    fishes[x+1] += 1
   end
-  return x_80 
-  
+
+  for d in 1:num
+    new_fish = zeros(Int, 9)
+
+    new_fish[9] += fishes[1]
+    new_fish[7] += fishes[1]
+
+    for x in 2:9
+      new_fish[x-1] += fishes[x]
+    end
+    fishes = new_fish
+  end
+  return sum(fishes) 
 end
 
 raw_input = parse.(Int, split(readlines("6.txt")[1], ",")) 
-println(solve(raw_input, 80))
-println(trunc(Int, part2(raw_input, 80)))
+@show part2(raw_input, 256)
 
