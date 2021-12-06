@@ -10,6 +10,7 @@ function solve(original_in,num )
   return length(original_in)
 end
 
+
 #=
 # 1
 # 0
@@ -21,17 +22,20 @@ function part2(line_in, num)
   # 0 -> 6 downto 0 to grow
   # 8 -> 0 -> 6 
   x_80 = 0
+  idx = 1
   for element in line_in
-    tau = 10
-    a = 1
-    b = 2
-    x_80 += a * b ^(((num-element)+8)/tau)
+    to = num - element
+    spawn_times = idx + 8:6:to 
+    while(idx != to)
+      x_80 += length(spawn_times)
+      spawn_times = idx + 8:6:to
+    end
   end
   return x_80 
   
 end
 
-raw_input =parse.(Int, split(readlines("6.txt")[1], ",")) 
+raw_input = parse.(Int, split(readlines("6.txt")[1], ",")) 
 println(solve(raw_input, 80))
 println(trunc(Int, part2(raw_input, 80)))
 
